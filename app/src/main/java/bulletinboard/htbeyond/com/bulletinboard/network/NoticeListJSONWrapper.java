@@ -2,6 +2,8 @@ package bulletinboard.htbeyond.com.bulletinboard.network;
 
 import android.util.Log;
 
+import com.google.gson.JsonObject;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

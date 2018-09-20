@@ -17,8 +17,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+
 import org.json.JSONObject;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +32,9 @@ import bulletinboard.htbeyond.com.bulletinboard.R;
 import bulletinboard.htbeyond.com.bulletinboard.models.Notice;
 import bulletinboard.htbeyond.com.bulletinboard.models.NoticeStorage;
 import bulletinboard.htbeyond.com.bulletinboard.network.NoticeListJSONWrapper;
+import bulletinboard.htbeyond.com.bulletinboard.network.NoticeRepo;
 import bulletinboard.htbeyond.com.bulletinboard.network.NoticeService;
+import bulletinboard.htbeyond.com.bulletinboard.network.PageRepo;
 import bulletinboard.htbeyond.com.bulletinboard.network.RetrofitService;
 import bulletinboard.htbeyond.com.bulletinboard.recyclerviewhelpers.EndlessRecyclerViewScrollListener;
 import bulletinboard.htbeyond.com.bulletinboard.recyclerviewhelpers.NoticeAdapter;
@@ -146,22 +153,22 @@ public class NoticeListFragment extends Fragment {
 
     private void loadFirstPage() {
 
-        Call<JSONObject> res = RetrofitService.getInstance(getActivity()).getService()
+        Call<PageRepo> res = RetrofitService.getInstance(getActivity()).getService()
                 .getNotices(getActivity().getString(R.string.access_token) , NoticeService.NORMAL_SIZE, mCurrentPageNumber, NoticeService.MODE_FIND_ALL);
 
-        res.enqueue(new Callback<JSONObject>() {
+        res.enqueue(new Callback<PageRepo>() {
             @Override
-            public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+            public void onResponse(Call<PageRepo> call, Response<PageRepo> response) {
                 Log.d(TAG, "getNotices() called" + response.toString());
                 if (response.isSuccessful()) {
                     Toast.makeText(getActivity(), response.body().toString(), Toast.LENGTH_LONG);
-                    NoticeListJSONWrapper jsonWrapper = new NoticeListJSONWrapper(response.body());
+                    PageRepo page = response.body();
 
-                    mAdapter.setNotices(jsonWrapper.getNotices());
+                    mAdapter.setNotices(page.getNotices());
                     mIsLoading = false;
-                    mTotalPage = jsonWrapper.getTotalNumberOfPages();
+                    mTotalPage = page.getTotalPages();
 
-                    if (jsonWrapper.isLast()) {
+                    if (page.getLast()) {
                         mAdapter.addLoadingFooter();
                     } else {
                         mIsLastPage = true;
@@ -171,7 +178,7 @@ public class NoticeListFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<JSONObject> call, Throwable t) {
+            public void onFailure(Call<PageRepo> call, Throwable t) {
                 Log.e(TAG, "getNotices() called" + t.getMessage());
                 Toast.makeText(getActivity(), R.string.toast_failure, Toast.LENGTH_SHORT).show();
             }
@@ -181,23 +188,23 @@ public class NoticeListFragment extends Fragment {
 
     private void loadNextPage() {
 
-        Call<JSONObject> res = RetrofitService.getInstance(getActivity()).getService()
+        Call<PageRepo> res = RetrofitService.getInstance(getActivity()).getService()
                 .getNotices(getActivity().getString(R.string.access_token) , NoticeService.NORMAL_SIZE, mCurrentPageNumber, NoticeService.MODE_FIND_ALL);
 
-        res.enqueue(new Callback<JSONObject>() {
+        res.enqueue(new Callback<PageRepo>() {
             @Override
-            public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
+            public void onResponse(Call<PageRepo> call, Response<PageRepo> response) {
                 Log.d(TAG, "getNotices() called" + response.toString());
                 if (response.isSuccessful()) {
                     Toast.makeText(getActivity(), response.body().toString(), Toast.LENGTH_LONG);
-                    NoticeListJSONWrapper jsonWrapper = new NoticeListJSONWrapper(response.body());
+                    PageRepo page = response.body();
 
                     mProgressBar.setVisibility(View.GONE);
                     mAdapter.removeLoadingFooter();
                     mIsLoading = false;
-                    mAdapter.addAll(jsonWrapper.getNotices());
+                    mAdapter.addAll(page.getNotices());
 
-                    if (jsonWrapper.isLast()) {
+                    if (page.getLast()) {
                         mAdapter.addLoadingFooter();
                     } else {
                         mIsLastPage = true;
@@ -207,7 +214,7 @@ public class NoticeListFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<JSONObject> call, Throwable t) {
+            public void onFailure(Call<PageRepo> call, Throwable t) {
                 Log.e(TAG, "getNotices() called" + t.getMessage());
                 Toast.makeText(getActivity(), R.string.toast_failure, Toast.LENGTH_SHORT).show();
             }

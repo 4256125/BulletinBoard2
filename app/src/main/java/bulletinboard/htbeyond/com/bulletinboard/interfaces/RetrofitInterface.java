@@ -4,8 +4,11 @@ import com.google.gson.JsonObject;
 
 import org.json.JSONObject;
 
+import java.util.List;
+
 import bulletinboard.htbeyond.com.bulletinboard.models.Notice;
 import bulletinboard.htbeyond.com.bulletinboard.network.NoticeRepo;
+import bulletinboard.htbeyond.com.bulletinboard.network.PageRepo;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
@@ -17,7 +20,7 @@ import retrofit2.http.Query;
 public interface RetrofitInterface {
     @Headers({"Accept: application/json"})
     @GET("bdms/noticeBoard/searchNoticePost")
-    Call<JSONObject> getNotices(
+    Call<PageRepo> getNotices(
             @Query("access_token") String access_token
             , @Query("pageSize") int pageSize
             , @Query("pageNum") int pageNum

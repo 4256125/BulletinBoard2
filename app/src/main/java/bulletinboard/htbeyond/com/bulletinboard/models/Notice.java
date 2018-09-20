@@ -134,8 +134,12 @@ public class Notice {
         return this;
     }
 
-    public Notice setViews(int views) {
-        mViews = views;
+    public Notice setViews(Integer views) {
+        if (views == null) {
+            mViews = 0;
+        } else {
+            mViews = views;
+        }
         return this;
     }
 

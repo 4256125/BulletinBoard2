@@ -111,31 +111,31 @@ public abstract class NoticeService {
         });
     }
 
-    public void getNotices(int pageSize, int pageNum) {
-
-        Call<JSONObject> res = RetrofitService.getInstance(mContext).getService()
-                .getNotices(mContext.getString(R.string.access_token) , pageSize, pageNum, MODE_FIND_ALL);
-        res.enqueue(new Callback<JSONObject>() {
-            @Override
-            public void onResponse(Call<JSONObject> call, Response<JSONObject> response) {
-                Log.d(TAG, "getNotices() called" + response.toString());
-                if (response.isSuccessful()) {
-                    Toast.makeText(mContext, response.body().toString(), Toast.LENGTH_LONG);
-                    NoticeListJSONWrapper jsonWrapper = new NoticeListJSONWrapper(response.body());
-                    NoticeStorage storage = NoticeStorage.getInstance(mContext);
-                    storage.appendNotices(jsonWrapper.getNotices());
-                    storage.setLast(jsonWrapper.isLast());
-                    onDo();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<JSONObject> call, Throwable t) {
-                Log.e(TAG, "getNotices() called" + t.getMessage());
-                showFailToast();
-            }
-        });
-    }
+//    public void getNotices(int pageSize, int pageNum) {
+//
+//        Call<JsonObject> res = RetrofitService.getInstance(mContext).getService()
+//                .getNotices(mContext.getString(R.string.access_token) , pageSize, pageNum, MODE_FIND_ALL);
+//        res.enqueue(new Callback<JsonObject>() {
+//            @Override
+//            public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+//                Log.d(TAG, "getNotices() called" + response.toString());
+//                if (response.isSuccessful()) {
+//                    Toast.makeText(mContext, response.body().toString(), Toast.LENGTH_LONG);
+//                    NoticeListJSONWrapper jsonWrapper = new NoticeListJSONWrapper(response.body());
+//                    NoticeStorage storage = NoticeStorage.getInstance(mContext);
+//                    storage.appendNotices(jsonWrapper.getNotices());
+//                    storage.setLast(jsonWrapper.isLast());
+//                    onDo();
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(Call<JsonObject> call, Throwable t) {
+//                Log.e(TAG, "getNotices() called" + t.getMessage());
+//                showFailToast();
+//            }
+//        });
+//    }
 
     public void updateNotice(Notice notice) {
 
