@@ -8,7 +8,7 @@ public abstract class PaginationScrollListener extends RecyclerView.OnScrollList
     LinearLayoutManager layoutManager;
 
     public PaginationScrollListener(LinearLayoutManager linearLayoutManager) {
-        this.layoutManager = layoutManager;
+        this.layoutManager = linearLayoutManager;
     }
 
 
@@ -18,11 +18,11 @@ public abstract class PaginationScrollListener extends RecyclerView.OnScrollList
 
         int visibleItemCount = layoutManager.getChildCount();
         int totalItemCount = layoutManager.getItemCount();
-        int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+        int firstCompletelyVisibleItemPosition = layoutManager.findFirstCompletelyVisibleItemPosition();
 
         if (!isLoading() && !isLastPage()) {
-            if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount
-                    && firstVisibleItemPosition >= 0) {
+            if ((visibleItemCount + firstCompletelyVisibleItemPosition) >= totalItemCount
+                    && firstCompletelyVisibleItemPosition >= 0) {
                 loadMoreItems();
             }
         }

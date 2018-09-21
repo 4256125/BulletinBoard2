@@ -16,8 +16,9 @@ import bulletinboard.htbeyond.com.bulletinboard.models.NoticeStorage;
 
 public class NoticeActivity extends AppCompatActivity {
 
+    private static final int REQUEST_EDIT_ACTIVITY = 0;
     private static final String TAG = "NoticeActivity";
-    private static final String EXTRA_NOTICE_NUM =
+    private static final String EXTRA_NOTICE =
             "bulletinboard.htbeyond.com.bulletinboard.notice_num";
 
     private Notice mNotice;
@@ -28,9 +29,9 @@ public class NoticeActivity extends AppCompatActivity {
     private TextView mModifiedDate;
 
 
-    public static Intent newIntent(Context packageContext, int noticeId) {
+    public static Intent newIntent(Context packageContext, Notice notice) {
         Intent i = new Intent(packageContext, NoticeActivity.class);
-        i.putExtra(EXTRA_NOTICE_NUM, noticeId);
+        i.putExtra(EXTRA_NOTICE, notice);
 
         return i;
     }
@@ -40,13 +41,52 @@ public class NoticeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notice);
 
-        int noticeNum = getIntent().getIntExtra(EXTRA_NOTICE_NUM, 0);
-        if (noticeNum == 0) {
+        mNotice = (Notice) getIntent().getSerializableExtra(EXTRA_NOTICE);
+        if (mNotice == null) {
             Log.e(TAG, "onCreate() called. There is no noticeNum in Intent.");
             finish();
             return;
         }
-        mNotice = NoticeStorage.getInstance(NoticeActivity.this).getNotice(noticeNum);
+
+        updateUI();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.activity_notice, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_notice_item_edit :
+                Intent i = NoticeEditActivity.newIntent(NoticeActivity.this, mNotice);
+                startActivityForResult(i, REQUEST_EDIT_ACTIVITY); //TODO 작성 값 돌려주기
+                return true;
+            case R.id.menu_notice_item_highlight:
+
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case REQUEST_EDIT_ACTIVITY:
+                    mNotice = (Notice) data.getSerializableExtra(EXTRA_NOTICE);
+                    updateUI();
+            }
+        } else if (resultCode == NoticeEditActivity.RESULT_DELETE) {
+            finish();
+        }
+    }
+
+    private void updateUI() {
         mTitle = (TextView) findViewById(R.id.notice_title);
         mTitle.setText(mNotice.getTitle());
 
@@ -61,28 +101,6 @@ public class NoticeActivity extends AppCompatActivity {
 
         mModifiedDate = (TextView) findViewById(R.id.notice_modified_date);
         mModifiedDate.setText(mNotice.getModifiedDateToString());
-
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.activity_notice, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_notice_item_edit :
-                Intent i = NoticeEditActivity.newIntent(NoticeActivity.this, mNotice.getNoticeId());
-                startActivity(i);
-                return true;
-            case R.id.menu_notice_item_highlight:
-
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
 }

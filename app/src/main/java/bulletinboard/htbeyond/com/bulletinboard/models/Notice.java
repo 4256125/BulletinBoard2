@@ -2,11 +2,12 @@ package bulletinboard.htbeyond.com.bulletinboard.models;
 
 import android.text.format.DateFormat;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class Notice {
+public class Notice implements Serializable{
 
     public static final int POST = 0;
     public static final int UPDATE = 1;

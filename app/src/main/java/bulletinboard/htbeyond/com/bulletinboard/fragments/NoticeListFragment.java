@@ -17,26 +17,15 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
-
-import org.json.JSONObject;
-
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.List;
 
 import bulletinboard.htbeyond.com.bulletinboard.NoticeEditActivity;
 import bulletinboard.htbeyond.com.bulletinboard.R;
 import bulletinboard.htbeyond.com.bulletinboard.models.Notice;
 import bulletinboard.htbeyond.com.bulletinboard.models.NoticeStorage;
-import bulletinboard.htbeyond.com.bulletinboard.network.NoticeListJSONWrapper;
-import bulletinboard.htbeyond.com.bulletinboard.network.NoticeRepo;
 import bulletinboard.htbeyond.com.bulletinboard.network.NoticeService;
 import bulletinboard.htbeyond.com.bulletinboard.network.PageRepo;
 import bulletinboard.htbeyond.com.bulletinboard.network.RetrofitService;
-import bulletinboard.htbeyond.com.bulletinboard.recyclerviewhelpers.EndlessRecyclerViewScrollListener;
 import bulletinboard.htbeyond.com.bulletinboard.recyclerviewhelpers.NoticeAdapter;
 import bulletinboard.htbeyond.com.bulletinboard.recyclerviewhelpers.PaginationScrollListener;
 import retrofit2.Call;
@@ -80,10 +69,12 @@ public class NoticeListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_notice_list, container, false);
         mRecyclerView = (RecyclerView) view.findViewById(R.id.list_recycler_view);
-        mProgressBar = (ProgressBar) view.findViewById(R.id.list_item_progress_bar);
+        mProgressBar = (ProgressBar) view.findViewById(R.id.fragment_progress_bar);
         mAdapter = new NoticeAdapter(NoticeStorage.getInstance(getActivity()).getNotices());
         mLinearLayoutManager = new LinearLayoutManager(
                 getActivity(), LinearLayoutManager.VERTICAL, false);
+
+        Log.d("NoticeListFragment", mLinearLayoutManager.toString());
 
         mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mAdapter);
@@ -91,6 +82,7 @@ public class NoticeListFragment extends Fragment {
         mRecyclerView.addOnScrollListener(new PaginationScrollListener(mLinearLayoutManager) {
             @Override
             protected void loadMoreItems() {
+                Log.d(TAG, "loadMoreItems() called");
                 mIsLoading = true;
                 loadNextPage();
                 mCurrentPageNumber++;
@@ -123,6 +115,8 @@ public class NoticeListFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mAdapter.clear();
+        loadFirstPage();
     }
 
     @Override
@@ -142,16 +136,22 @@ public class NoticeListFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_notice_list_item_post:
-                Intent i = NoticeEditActivity.newIntent(getActivity(), NoticeEditActivity.CREATE_NOTICE);
+                Intent i = NoticeEditActivity.newIntent(getActivity(), null);
                 startActivity(i);
-
                 return true;
+
+            case R.id.menu_notice_list_item_refresh:
+                loadNextPage();
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+
+
     private void loadFirstPage() {
+        mCurrentPageNumber = PAGE_START;
 
         Call<PageRepo> res = RetrofitService.getInstance(getActivity()).getService()
                 .getNotices(getActivity().getString(R.string.access_token) , NoticeService.NORMAL_SIZE, mCurrentPageNumber, NoticeService.MODE_FIND_ALL);
@@ -163,7 +163,9 @@ public class NoticeListFragment extends Fragment {
                 if (response.isSuccessful()) {
                     Toast.makeText(getActivity(), response.body().toString(), Toast.LENGTH_LONG);
                     PageRepo page = response.body();
+                    Log.d(TAG, "getNotices() called" + response.body().toString());
 
+                    mProgressBar.setVisibility(View.GONE);
                     mAdapter.setNotices(page.getNotices());
                     mIsLoading = false;
                     mTotalPage = page.getTotalPages();
@@ -188,6 +190,8 @@ public class NoticeListFragment extends Fragment {
 
     private void loadNextPage() {
 
+        mCurrentPageNumber++;
+
         Call<PageRepo> res = RetrofitService.getInstance(getActivity()).getService()
                 .getNotices(getActivity().getString(R.string.access_token) , NoticeService.NORMAL_SIZE, mCurrentPageNumber, NoticeService.MODE_FIND_ALL);
 
@@ -199,7 +203,6 @@ public class NoticeListFragment extends Fragment {
                     Toast.makeText(getActivity(), response.body().toString(), Toast.LENGTH_LONG);
                     PageRepo page = response.body();
 
-                    mProgressBar.setVisibility(View.GONE);
                     mAdapter.removeLoadingFooter();
                     mIsLoading = false;
                     mAdapter.addAll(page.getNotices());

@@ -3,6 +3,10 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/menu_notice_list_item_refresh"
+        android:title="@string/notice_list_refresh"
+        app:showAsAction="ifRoom" />
+    <item
         android:id="@+id/menu_notice_list_item_post"
         android:title="@string/notice_list_post"
         app:showAsAction="ifRoom" />

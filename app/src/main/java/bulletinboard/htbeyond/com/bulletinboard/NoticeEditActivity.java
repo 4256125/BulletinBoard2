@@ -22,12 +22,13 @@ import retrofit2.Response;
 
 public class NoticeEditActivity extends AppCompatActivity {
 
-    private static final String EXTRA_NOTICE_NUM =
+    private static final String EXTRA_NOTICE =
             "bulletinboard.htbeyond.com.bulletinboard.notice_num";
     private static final String KEY_TITLE = "title";
     private static final String KEY_CONTENT = "content";
     private static final String KEY_HIGHLIGHT = "highlight";
     public static final int CREATE_NOTICE = -1;
+    public static final int RESULT_DELETE = 10;
 
     private static final String TAG = "NoticeEditActivity";
 
@@ -38,17 +39,9 @@ public class NoticeEditActivity extends AppCompatActivity {
     private boolean mCreating;
 
 
-    /**
-     *
-     * @param packageContext
-     * @param noticeNum
-     * 만약 새로 Notice를 만들 시, <br/>
-     * NoticeEditActivity.CREATE_NOTICE 를 넣으면 된다.
-     * @return
-     */
-    public static Intent newIntent(Context packageContext, int noticeNum) {
+    public static Intent newIntent(Context packageContext, Notice notice) {
         Intent i = new Intent(packageContext, NoticeEditActivity.class);
-        i.putExtra(EXTRA_NOTICE_NUM, noticeNum);
+        i.putExtra(EXTRA_NOTICE, notice);
 
         return i;
     }
@@ -59,8 +52,8 @@ public class NoticeEditActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notice_edit);
 
-        int noticeNum = getIntent().getIntExtra(EXTRA_NOTICE_NUM, CREATE_NOTICE);
-        if (noticeNum == CREATE_NOTICE) {
+        mNotice = (Notice) getIntent().getSerializableExtra(EXTRA_NOTICE);
+        if (mNotice == null) {
             mCreating = true;
         }
 
@@ -70,17 +63,13 @@ public class NoticeEditActivity extends AppCompatActivity {
 
         // savedIntanceState에 저장된 값이 있으면 해당 값을, 저장된 값이 없으면 Notice의 값을 보여줌
 
-
         if (savedInstanceState == null) {
-            if (noticeNum != CREATE_NOTICE) {
-                Notice notice =
-                        NoticeStorage.getInstance(NoticeEditActivity.this).getNotice(noticeNum);
-                mNotice = notice;
-                mTitleTextView.setText(notice.getTitle());
-                mContentTextView.setText(notice.getContent());
-                mHighlightedCheckBox.setChecked(notice.isHighlighted());
-            } else {
+            if (mCreating) {
                 mNotice = new Notice();
+            } else {
+                mTitleTextView.setText(mNotice.getTitle());
+                mContentTextView.setText(mNotice.getContent());
+                mHighlightedCheckBox.setChecked(mNotice.isHighlighted());
             }
         } else {
             mTitleTextView.setText(
@@ -108,6 +97,9 @@ public class NoticeEditActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.menu_notice_edit_item_edit:
                 sendNotice();
+                Intent i = new Intent();
+                i.putExtra(EXTRA_NOTICE, mNotice);
+                setResult(RESULT_OK, i);
                 finish();
                 return true;
             case R.id.menu_notice_edit_item_delete:
@@ -167,26 +159,21 @@ public class NoticeEditActivity extends AppCompatActivity {
 
     //context 찾아 넣기
     private void deleteNotice(){
-        mNotice.setNoticeId(getIntent().getIntExtra(EXTRA_NOTICE_NUM, CREATE_NOTICE));
-
         Call<NoticeRepo> res = RetrofitService.getInstance(NoticeEditActivity.this).getService()
                 .deleteNotice(getString(R.string.access_token), mNotice.getNoticeId());
         res.enqueue(new Callback<NoticeRepo>() {
             @Override
             public void onResponse(Call<NoticeRepo> call, Response<NoticeRepo> response) {
                 Log.d(TAG, "deleteNotice() called" + response.toString());
-                if (response.isSuccessful()) {
-                    Toast.makeText(NoticeEditActivity.this, R.string.toast_delete_success, Toast.LENGTH_SHORT).show();
 
-                } else {
-                    showFailToast();
-                }
             }
 
             @Override
             public void onFailure(Call<NoticeRepo> call, Throwable t) {
                 Log.e(TAG, "deleteNotice() called" + t.getMessage());
-                showFailToast();
+                Toast.makeText(NoticeEditActivity.this, R.string.toast_delete_success, Toast.LENGTH_SHORT).show();
+                setResult(RESULT_DELETE);
+                finish();
             }
         });
 

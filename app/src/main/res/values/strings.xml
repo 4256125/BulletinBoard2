@@ -12,7 +12,8 @@
     <string name="notice_title_text">제목</string>
     <string name="notice_content_text">게시 내용</string>
 
-    <string name="list_item_views">%d views</string>
+    <string name="list_item_id">%d  번</string>
+    <string name="list_item_views">%d  views</string>
     <string name="base_uri">https://192.168.1.122:8444/</string>
     <string name="access_token">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX25hbWUiOiJkb2xkYXJpIiwidXNlcl9kZXRhaWwiOnsib2F1dGhfdXNlcl9pbmZvIjp7Im1lbWJlcklkIjoiZG9sZGFyaSIsIm5hbWUiOiLshJzshJ3qtZAiLCJiaXJ0aGRheSI6IjE5ODMtMDktMTMiLCJob21lUGhvbmVOdW1iZXIiOiIyMjIyMiIsImNlbGxQaG9uZU51bWJlciI6ImRvbGRhcmkiLCJlbWFpbCI6ImNoaW5nb29AaGFubWFpbC5jb20iLCJnZW5kZXIiOm51bGwsImF1dGhvcml6ZWREYXRlIjpudWxsfX0sInNjb3BlIjpbInRydXN0IiwicmVhZCIsIndyaXRlIl0sImp0aSI6IjZkMTc4YTc2LWUwNTAtNDUyNS04MmNmLTc2NmZkMDhkZjJiNyIsImNsaWVudF9pZCI6ImJjZ19zZXJ2ZXIifQ.0kMFFrGGzG7pQXvlXsHaLTctBWHnd04W7-Ol_sy_sHQ</string>
 
@@ -22,4 +23,5 @@
     <string name="toast_failure">failure</string>
 
     <string name="notice_list_post">게시글 작성</string>
+    <string name="notice_list_refresh">더 보기</string>
 </resources>

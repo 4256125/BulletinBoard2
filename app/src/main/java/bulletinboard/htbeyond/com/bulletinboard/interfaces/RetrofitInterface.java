@@ -49,4 +49,9 @@ public interface RetrofitInterface {
             @Query("access_token") String access_token
             , @Query("noticeNum") int noticeNum);
 
+    @GET("bdms/noticeBoard/getNoticeViewNum")
+    Call<Integer> getViewNum(
+            @Query("access_token") String access_token
+            , @Query("noticeNum") int noticeNum);
+
 }
